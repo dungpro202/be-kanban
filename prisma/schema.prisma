@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "commonjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Model User (Người dùng)
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  boards    Board[]
+}
+
+// Model Board (Bảng công việc)
+model Board {
+  id        Int      @id @default(autoincrement())
+  title     String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  columns   Column[]
+  createdAt DateTime @default(now())
+}
+
+// Model Column (Cột trạng thái: Todo, In Progress, Done...)
+model Column {
+  id        Int      @id @default(autoincrement())
+  title     String
+  boardId   Int
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+  position  Int      @default(0) // Để sắp xếp thứ tự cột
+}
+
+// Model Task (Công việc cụ thể)
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  columnId    Int
+  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  position    Int      @default(0) // Để sắp xếp thứ tự task trong cột
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
