@@ -43,6 +43,9 @@ export type ColumnMinAggregateOutputType = {
   title: string | null
   boardId: number | null
   position: number | null
+  createdAt: Date | null
+  isArchived: boolean | null
+  updatedAt: Date | null
 }
 
 export type ColumnMaxAggregateOutputType = {
@@ -50,6 +53,9 @@ export type ColumnMaxAggregateOutputType = {
   title: string | null
   boardId: number | null
   position: number | null
+  createdAt: Date | null
+  isArchived: boolean | null
+  updatedAt: Date | null
 }
 
 export type ColumnCountAggregateOutputType = {
@@ -57,6 +63,9 @@ export type ColumnCountAggregateOutputType = {
   title: number
   boardId: number
   position: number
+  createdAt: number
+  isArchived: number
+  updatedAt: number
   _all: number
 }
 
@@ -78,6 +87,9 @@ export type ColumnMinAggregateInputType = {
   title?: true
   boardId?: true
   position?: true
+  createdAt?: true
+  isArchived?: true
+  updatedAt?: true
 }
 
 export type ColumnMaxAggregateInputType = {
@@ -85,6 +97,9 @@ export type ColumnMaxAggregateInputType = {
   title?: true
   boardId?: true
   position?: true
+  createdAt?: true
+  isArchived?: true
+  updatedAt?: true
 }
 
 export type ColumnCountAggregateInputType = {
@@ -92,6 +107,9 @@ export type ColumnCountAggregateInputType = {
   title?: true
   boardId?: true
   position?: true
+  createdAt?: true
+  isArchived?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -186,6 +204,9 @@ export type ColumnGroupByOutputType = {
   title: string
   boardId: number
   position: number
+  createdAt: Date
+  isArchived: boolean
+  updatedAt: Date
   _count: ColumnCountAggregateOutputType | null
   _avg: ColumnAvgAggregateOutputType | null
   _sum: ColumnSumAggregateOutputType | null
@@ -216,6 +237,9 @@ export type ColumnWhereInput = {
   title?: Prisma.StringFilter<"Column"> | string
   boardId?: Prisma.IntFilter<"Column"> | number
   position?: Prisma.IntFilter<"Column"> | number
+  createdAt?: Prisma.DateTimeFilter<"Column"> | Date | string
+  isArchived?: Prisma.BoolFilter<"Column"> | boolean
+  updatedAt?: Prisma.DateTimeFilter<"Column"> | Date | string
   board?: Prisma.XOR<Prisma.BoardScalarRelationFilter, Prisma.BoardWhereInput>
   tasks?: Prisma.TaskListRelationFilter
 }
@@ -225,6 +249,9 @@ export type ColumnOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   boardId?: Prisma.SortOrder
   position?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   board?: Prisma.BoardOrderByWithRelationInput
   tasks?: Prisma.TaskOrderByRelationAggregateInput
 }
@@ -237,6 +264,9 @@ export type ColumnWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Column"> | string
   boardId?: Prisma.IntFilter<"Column"> | number
   position?: Prisma.IntFilter<"Column"> | number
+  createdAt?: Prisma.DateTimeFilter<"Column"> | Date | string
+  isArchived?: Prisma.BoolFilter<"Column"> | boolean
+  updatedAt?: Prisma.DateTimeFilter<"Column"> | Date | string
   board?: Prisma.XOR<Prisma.BoardScalarRelationFilter, Prisma.BoardWhereInput>
   tasks?: Prisma.TaskListRelationFilter
 }, "id">
@@ -246,6 +276,9 @@ export type ColumnOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   boardId?: Prisma.SortOrder
   position?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.ColumnCountOrderByAggregateInput
   _avg?: Prisma.ColumnAvgOrderByAggregateInput
   _max?: Prisma.ColumnMaxOrderByAggregateInput
@@ -261,11 +294,17 @@ export type ColumnScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Column"> | string
   boardId?: Prisma.IntWithAggregatesFilter<"Column"> | number
   position?: Prisma.IntWithAggregatesFilter<"Column"> | number
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Column"> | Date | string
+  isArchived?: Prisma.BoolWithAggregatesFilter<"Column"> | boolean
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Column"> | Date | string
 }
 
 export type ColumnCreateInput = {
   title: string
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
   board: Prisma.BoardCreateNestedOneWithoutColumnsInput
   tasks?: Prisma.TaskCreateNestedManyWithoutColumnInput
 }
@@ -275,12 +314,18 @@ export type ColumnUncheckedCreateInput = {
   title: string
   boardId: number
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutColumnInput
 }
 
 export type ColumnUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   board?: Prisma.BoardUpdateOneRequiredWithoutColumnsNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutColumnNestedInput
 }
@@ -290,6 +335,9 @@ export type ColumnUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   boardId?: Prisma.IntFieldUpdateOperationsInput | number
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutColumnNestedInput
 }
 
@@ -298,11 +346,17 @@ export type ColumnCreateManyInput = {
   title: string
   boardId: number
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
 }
 
 export type ColumnUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ColumnUncheckedUpdateManyInput = {
@@ -310,6 +364,9 @@ export type ColumnUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   boardId?: Prisma.IntFieldUpdateOperationsInput | number
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ColumnListRelationFilter = {
@@ -327,6 +384,9 @@ export type ColumnCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   boardId?: Prisma.SortOrder
   position?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ColumnAvgOrderByAggregateInput = {
@@ -340,6 +400,9 @@ export type ColumnMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   boardId?: Prisma.SortOrder
   position?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ColumnMinOrderByAggregateInput = {
@@ -347,6 +410,9 @@ export type ColumnMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   boardId?: Prisma.SortOrder
   position?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  isArchived?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ColumnSumOrderByAggregateInput = {
@@ -402,6 +468,10 @@ export type ColumnUncheckedUpdateManyWithoutBoardNestedInput = {
   deleteMany?: Prisma.ColumnScalarWhereInput | Prisma.ColumnScalarWhereInput[]
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type ColumnCreateNestedOneWithoutTasksInput = {
   create?: Prisma.XOR<Prisma.ColumnCreateWithoutTasksInput, Prisma.ColumnUncheckedCreateWithoutTasksInput>
   connectOrCreate?: Prisma.ColumnCreateOrConnectWithoutTasksInput
@@ -419,6 +489,9 @@ export type ColumnUpdateOneRequiredWithoutTasksNestedInput = {
 export type ColumnCreateWithoutBoardInput = {
   title: string
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
   tasks?: Prisma.TaskCreateNestedManyWithoutColumnInput
 }
 
@@ -426,6 +499,9 @@ export type ColumnUncheckedCreateWithoutBoardInput = {
   id?: number
   title: string
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutColumnInput
 }
 
@@ -463,11 +539,17 @@ export type ColumnScalarWhereInput = {
   title?: Prisma.StringFilter<"Column"> | string
   boardId?: Prisma.IntFilter<"Column"> | number
   position?: Prisma.IntFilter<"Column"> | number
+  createdAt?: Prisma.DateTimeFilter<"Column"> | Date | string
+  isArchived?: Prisma.BoolFilter<"Column"> | boolean
+  updatedAt?: Prisma.DateTimeFilter<"Column"> | Date | string
 }
 
 export type ColumnCreateWithoutTasksInput = {
   title: string
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
   board: Prisma.BoardCreateNestedOneWithoutColumnsInput
 }
 
@@ -476,6 +558,9 @@ export type ColumnUncheckedCreateWithoutTasksInput = {
   title: string
   boardId: number
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
 }
 
 export type ColumnCreateOrConnectWithoutTasksInput = {
@@ -497,6 +582,9 @@ export type ColumnUpdateToOneWithWhereWithoutTasksInput = {
 export type ColumnUpdateWithoutTasksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   board?: Prisma.BoardUpdateOneRequiredWithoutColumnsNestedInput
 }
 
@@ -505,17 +593,26 @@ export type ColumnUncheckedUpdateWithoutTasksInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   boardId?: Prisma.IntFieldUpdateOperationsInput | number
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ColumnCreateManyBoardInput = {
   id?: number
   title: string
   position?: number
+  createdAt?: Date | string
+  isArchived?: boolean
+  updatedAt?: Date | string
 }
 
 export type ColumnUpdateWithoutBoardInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUpdateManyWithoutColumnNestedInput
 }
 
@@ -523,6 +620,9 @@ export type ColumnUncheckedUpdateWithoutBoardInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutColumnNestedInput
 }
 
@@ -530,6 +630,9 @@ export type ColumnUncheckedUpdateManyWithoutBoardInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -568,6 +671,9 @@ export type ColumnSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   title?: boolean
   boardId?: boolean
   position?: boolean
+  createdAt?: boolean
+  isArchived?: boolean
+  updatedAt?: boolean
   board?: boolean | Prisma.BoardDefaultArgs<ExtArgs>
   tasks?: boolean | Prisma.Column$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.ColumnCountOutputTypeDefaultArgs<ExtArgs>
@@ -578,6 +684,9 @@ export type ColumnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   title?: boolean
   boardId?: boolean
   position?: boolean
+  createdAt?: boolean
+  isArchived?: boolean
+  updatedAt?: boolean
   board?: boolean | Prisma.BoardDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["column"]>
 
@@ -586,6 +695,9 @@ export type ColumnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   title?: boolean
   boardId?: boolean
   position?: boolean
+  createdAt?: boolean
+  isArchived?: boolean
+  updatedAt?: boolean
   board?: boolean | Prisma.BoardDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["column"]>
 
@@ -594,9 +706,12 @@ export type ColumnSelectScalar = {
   title?: boolean
   boardId?: boolean
   position?: boolean
+  createdAt?: boolean
+  isArchived?: boolean
+  updatedAt?: boolean
 }
 
-export type ColumnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "boardId" | "position", ExtArgs["result"]["column"]>
+export type ColumnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "boardId" | "position" | "createdAt" | "isArchived" | "updatedAt", ExtArgs["result"]["column"]>
 export type ColumnInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   board?: boolean | Prisma.BoardDefaultArgs<ExtArgs>
   tasks?: boolean | Prisma.Column$tasksArgs<ExtArgs>
@@ -620,6 +735,9 @@ export type $ColumnPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     title: string
     boardId: number
     position: number
+    createdAt: Date
+    isArchived: boolean
+    updatedAt: Date
   }, ExtArgs["result"]["column"]>
   composites: {}
 }
@@ -1049,6 +1167,9 @@ export interface ColumnFieldRefs {
   readonly title: Prisma.FieldRef<"Column", 'String'>
   readonly boardId: Prisma.FieldRef<"Column", 'Int'>
   readonly position: Prisma.FieldRef<"Column", 'Int'>
+  readonly createdAt: Prisma.FieldRef<"Column", 'DateTime'>
+  readonly isArchived: Prisma.FieldRef<"Column", 'Boolean'>
+  readonly updatedAt: Prisma.FieldRef<"Column", 'DateTime'>
 }
     
 

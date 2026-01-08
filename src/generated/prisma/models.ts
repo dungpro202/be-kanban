@@ -10,6 +10,12 @@
  */
 export type * from './models/User.js'
 export type * from './models/Board.js'
+export type * from './models/BoardMember.js'
 export type * from './models/Column.js'
 export type * from './models/Task.js'
+export type * from './models/Comment.js'
+export type * from './models/Label.js'
+export type * from './models/TaskLabel.js'
+export type * from './models/Attachment.js'
+export type * from './models/ActivityLog.js'
 export type * from './commonInputTypes.js'

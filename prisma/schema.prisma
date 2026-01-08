@@ -1,12 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "commonjs"
 }
 
@@ -14,44 +8,149 @@ datasource db {
   provider = "postgresql"
 }
 
-// Model User (Người dùng)
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
-  boards    Board[]
+  id               Int           @id @default(autoincrement())
+  email            String        @unique
+  password         String
+  name             String?
+  createdAt        DateTime      @default(now())
+  avatarUrl        String?
+  updatedAt        DateTime      @updatedAt
+  activityLogs     ActivityLog[]
+  attachments      Attachment[]
+  boardsOwned      Board[]       @relation("BoardOwner")
+  boardMemberships BoardMember[]
+  comments         Comment[]
+  tasksAssigned    Task[]        @relation("TaskAssignee")
 }
 
-// Model Board (Bảng công việc)
 model Board {
-  id        Int      @id @default(autoincrement())
-  title     String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  columns   Column[]
-  createdAt DateTime @default(now())
+  id          Int           @id @default(autoincrement())
+  title       String
+  createdAt   DateTime      @default(now())
+  description String?
+  ownerId     Int
+  updatedAt   DateTime      @updatedAt
+  activities  ActivityLog[]
+  owner       User          @relation("BoardOwner", fields: [ownerId], references: [id])
+  members     BoardMember[]
+  columns     Column[]
+  labels      Label[]
 }
 
-// Model Column (Cột trạng thái: Todo, In Progress, Done...)
+model BoardMember {
+  id       Int      @id @default(autoincrement())
+  boardId  Int
+  userId   Int
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
+  board    Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+}
+
 model Column {
-  id        Int      @id @default(autoincrement())
-  title     String
-  boardId   Int
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  tasks     Task[]
-  position  Int      @default(0) // Để sắp xếp thứ tự cột
+  id         Int      @id @default(autoincrement())
+  title      String
+  boardId    Int
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+  isArchived Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks      Task[]
 }
 
-// Model Task (Công việc cụ thể)
 model Task {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   title       String
   description String?
   columnId    Int
-  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  position    Int      @default(0) // Để sắp xếp thứ tự task trong cột
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  position    Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  assigneeId  Int?
+  dueDate     DateTime?
+  isArchived  Boolean       @default(false)
+  priority    Priority      @default(MEDIUM)
+  activities  ActivityLog[]
+  attachments Attachment[]
+  comments    Comment[]
+  assignee    User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  column      Column        @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  labels      TaskLabel[]
+
+  @@index([columnId])
+  @@index([assigneeId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  taskId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Label {
+  id      Int         @id @default(autoincrement())
+  name    String
+  color   String
+  boardId Int
+  board   Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks   TaskLabel[]
+
+  @@unique([boardId, name])
+}
+
+model TaskLabel {
+  taskId  Int
+  labelId Int
+  label   Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  task    Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+}
+
+model Attachment {
+  id         Int      @id @default(autoincrement())
+  url        String
+  fileName   String?
+  fileType   String?
+  taskId     Int
+  uploadedBy Int?
+  createdAt  DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [uploadedBy], references: [id])
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  boardId   Int
+  taskId    Int?
+  userId    Int
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  OBSERVER
+  TEST
 }
