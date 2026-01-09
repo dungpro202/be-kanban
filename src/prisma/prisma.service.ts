@@ -8,6 +8,9 @@ import { PrismaPg } from '@prisma/adapter-pg'; // Adapter cho PostgreSQL
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     const adapter = new PrismaPg({
+      // TODO: Thay đổi chuỗi kết nối phù hợp với môi trường của bạn
+      // Chưa có switch sử dụng biến môi trường được DIRECT_URL
+      // Lỗi kết nối khi sử dụng IPV6 với Prisma
       connectionString: process.env.DATABASE_URL || process.env.DIRECT_URL,
     });
     console.log('Prisma adapter created');
