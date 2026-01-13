@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TaskService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // 1. TẠO TASK MỚI
   async create(userId: number, dto: CreateTaskDto) {
@@ -19,7 +19,7 @@ export class TaskService {
         ...dto,
         position: count, // Gán vị trí cuối
         // Lưu ý: dueDate nhận vào là string, Prisma cần Date object
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined, 
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },
       include: {
         assignee: { select: { id: true, name: true, email: true, avatarUrl: true } }, // Trả về thông tin người được giao việc
@@ -61,7 +61,7 @@ export class TaskService {
   //   // Logic Kéo Thả Task (Reorder) rất phức tạp (vì có thể kéo sang cột khác)
   //   // Tạm thời mình chỉ update thông tin cơ bản trước.
   //   // Phần Reorder mình sẽ tách ra hàm riêng sau nhé.
-    
+
   //   return this.prisma.task.update({
   //     where: { id },
   //     data: {
@@ -71,80 +71,85 @@ export class TaskService {
   //   });
   // }
 
-  // 4. HÀM UPDATE (Đã nâng cấp logic Kéo Thả)
+  // 4.// 1. Update thông tin cơ bản (Loại bỏ các trường nhạy cảm nếu lỡ gửi lên)
   async update(id: number, dto: UpdateTaskDto) {
-    const task = await this.findOne(id);
+    // Tách riêng các trường không được phép sửa ở đây
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { position, columnId, assigneeId, ...cleanDto } = dto;
 
-    // Xác định xem user có muốn đổi vị trí hoặc đổi cột không
-    const isMoveColumn = dto.columnId && dto.columnId !== task.columnId;
-    const isReorder = dto.position !== undefined && dto.position !== task.position;
-
-    // Nếu có sự thay đổi về vị trí hoặc cột -> Gọi logic Reorder
-    if (isMoveColumn || isReorder) {
-        const newColumnId = dto.columnId || task.columnId; // Nếu không gửi columnId thì dùng cái cũ
-        const newPosition = dto.position !== undefined ? dto.position : task.position; // Nếu không gửi pos thì dùng cái cũ
-        
-        return this.reorder(task, newColumnId, newPosition);
-    }
-
-    // Nếu chỉ update title, assignee bình thường
     return this.prisma.task.update({
       where: { id },
       data: {
-        ...dto,
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        ...cleanDto, // Chỉ lấy title, description, priority...
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined, // Chuyển dueDate về Date object
       },
-      include: {
-         assignee: { select: { id: true, name: true, avatarUrl: true } }
-      }
+      include: { assignee: { select: { id: true, name: true, avatarUrl: true } } }
     });
   }
-  // 🔥 LOGIC TRÙM CUỐI: KÉO THẢ TASK (XỬ LÝ CẢ 2 TRƯỜNG HỢP)
+
+  // 4.2 Chỉ assign user
+  async assignUser(id: number, assigneeId: number | null) {
+    return this.prisma.task.update({
+      where: { id },
+      data: { assigneeId }, // Update mỗi cái này thôi
+      include: { assignee: true } // Trả về thông tin user
+    });
+  }
+
+  // 4.3 Chỉ xử lý kéo thả (Gọi lại hàm reorder cũ)
+  async moveTask(id: number, newColumnId: number, newPosition: number) {
+    const task = await this.findOne(id);
+    // Gọi lại hàm reorder
+    return this.reorder(task, newColumnId, newPosition);
+  }
+
+
+  // LOGIC: KÉO THẢ TASK (XỬ LÝ CẢ 2 TRƯỜNG HỢP)
   async reorder(task: any, newColumnId: number, newPosition: number) {
-    const operations : any[] = [];
+    const operations: any[] = [];
     const oldColumnId = task.columnId;
     const oldPosition = task.position;
 
     // TRƯỜNG HỢP 1: KÉO TRONG CÙNG 1 CỘT (Same Column)
     if (oldColumnId === newColumnId) {
-        // Logic y hệt như kéo cột (Reorder Column)
-        if (newPosition > oldPosition) {
-             // Kéo xuống dưới: Các thằng ở giữa dịch lên (trừ 1)
-             operations.push(this.prisma.task.updateMany({
-                 where: { columnId: oldColumnId, position: { gt: oldPosition, lte: newPosition }, id: { not: task.id } },
-                 data: { position: { decrement: 1 } }
-             }));
-        } else {
-             // Kéo lên trên: Các thằng ở giữa dịch xuống (cộng 1)
-             operations.push(this.prisma.task.updateMany({
-                 where: { columnId: oldColumnId, position: { gte: newPosition, lt: oldPosition }, id: { not: task.id } },
-                 data: { position: { increment: 1 } }
-             }));
-        }
-    } 
-    
+      // Logic y hệt như kéo cột (Reorder Column)
+      if (newPosition > oldPosition) {
+        // Kéo xuống dưới: Các thằng ở giữa dịch lên (trừ 1)
+        operations.push(this.prisma.task.updateMany({
+          where: { columnId: oldColumnId, position: { gt: oldPosition, lte: newPosition }, id: { not: task.id } },
+          data: { position: { decrement: 1 } }
+        }));
+      } else {
+        // Kéo lên trên: Các thằng ở giữa dịch xuống (cộng 1)
+        operations.push(this.prisma.task.updateMany({
+          where: { columnId: oldColumnId, position: { gte: newPosition, lt: oldPosition }, id: { not: task.id } },
+          data: { position: { increment: 1 } }
+        }));
+      }
+    }
+
     // TRƯỜNG HỢP 2: KÉO SANG CỘT KHÁC (Different Column)
     else {
-        // Bước 1: Dọn dẹp ở cột cũ (Old Column)
-        // Những thằng nằm SAU task cũ phải lùi lại để lấp chỗ trống -> Giảm 1
-        operations.push(this.prisma.task.updateMany({
-            where: { columnId: oldColumnId, position: { gt: oldPosition } },
-            data: { position: { decrement: 1 } }
-        }));
+      // Bước 1: Dọn dẹp ở cột cũ (Old Column)
+      // Những thằng nằm SAU task cũ phải lùi lại để lấp chỗ trống -> Giảm 1
+      operations.push(this.prisma.task.updateMany({
+        where: { columnId: oldColumnId, position: { gt: oldPosition } },
+        data: { position: { decrement: 1 } }
+      }));
 
-        // Bước 2: Dọn chỗ ở cột mới (New Column)
-        // Những thằng nằm TỪ vị trí mới trở đi phải nhường chỗ -> Tăng 1
-        operations.push(this.prisma.task.updateMany({
-            where: { columnId: newColumnId, position: { gte: newPosition } },
-            data: { position: { increment: 1 } }
-        }));
+      // Bước 2: Dọn chỗ ở cột mới (New Column)
+      // Những thằng nằm TỪ vị trí mới trở đi phải nhường chỗ -> Tăng 1
+      operations.push(this.prisma.task.updateMany({
+        where: { columnId: newColumnId, position: { gte: newPosition } },
+        data: { position: { increment: 1 } }
+      }));
     }
 
     // Bước 3: Di chuyển chính task đó vào vị trí mới
     operations.push(this.prisma.task.update({
-        where: { id: task.id },
-        data: { columnId: newColumnId, position: newPosition },
-        include: { assignee: { select: { id: true, name: true, avatarUrl: true } } }
+      where: { id: task.id },
+      data: { columnId: newColumnId, position: newPosition },
+      include: { assignee: { select: { id: true, name: true, avatarUrl: true } } }
     }));
 
     // Chạy tất cả trong 1 Transaction (An toàn tuyệt đối)
