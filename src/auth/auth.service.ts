@@ -72,13 +72,18 @@ export class AuthService {
   async signToken(userId: number, email: string) {
     const payload = { sub: userId, email };
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '1d', // Token hết hạn sau 1 ngày
+      expiresIn: '1d',
       secret: process.env.JWT_SECRET,
     });
 
+    // --- ------------------ ---
+    console.log('👇 TOKEN DƯỚI ĐÂY 👇');
+    console.log(token);
+    // ---------------------
+
     return {
       access_token: token,
-      user: { id: userId, email } // Trả thêm info để Frontend tiện dùng
+      user: { id: userId, email }
     };
-  }
+}
 }
