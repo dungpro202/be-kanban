@@ -13,6 +13,7 @@ model User {
   email            String        @unique
   password         String
   name             String?
+  role             SystemRole    @default(USER)
   createdAt        DateTime      @default(now())
   avatarUrl        String?
   updatedAt        DateTime      @updatedAt
@@ -147,9 +148,13 @@ enum Priority {
   HIGH
 }
 
+enum SystemRole {
+  USER // Người dùng bình thường
+  ADMIN // Super Admin (Quản lý hệ thống)
+}
+
 enum Role {
   OWNER
-  ADMIN
   MEMBER
   OBSERVER
   TEST

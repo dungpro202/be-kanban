@@ -18,9 +18,16 @@ export const Priority = {
 export type Priority = (typeof Priority)[keyof typeof Priority]
 
 
+export const SystemRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type SystemRole = (typeof SystemRole)[keyof typeof SystemRole]
+
+
 export const Role = {
   OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
   MEMBER: 'MEMBER',
   OBSERVER: 'OBSERVER',
   TEST: 'TEST'
