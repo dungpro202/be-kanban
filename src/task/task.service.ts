@@ -10,14 +10,17 @@ export class TaskService {
   // 1. TẠO TASK MỚI
   async create(userId: number, dto: CreateTaskDto) {
     // Tính toán vị trí cuối cùng trong cột
-    const count = await this.prisma.task.count({
+    const lastTask = await this.prisma.task.findFirst({
       where: { columnId: dto.columnId },
+      orderBy: { position: 'desc' },
     });
+
+    const newPosition = lastTask ? lastTask.position + 1 : 0; // Nếu chưa có task nào thì là 0
 
     return this.prisma.task.create({
       data: {
         ...dto,
-        position: count, // Gán vị trí cuối
+        position: newPosition, // Gán vị trí cuối
         // Lưu ý: dueDate nhận vào là string, Prisma cần Date object
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },

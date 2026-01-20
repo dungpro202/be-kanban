@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Injectable()
 export class BoardService {
@@ -53,6 +54,9 @@ export class BoardService {
             columns: true, // Đếm xem board này có bao nhiêu cột
             members: true  // Đếm xem board này có bao nhiêu thành viên
           }
+        },
+        owner: { // 👈 THÊM: Lấy info chủ bảng để hiển thị Avatar người tạo
+          select: { id: true, name: true, email: true, avatarUrl: true }
         }
       },
       orderBy: {
@@ -63,7 +67,7 @@ export class BoardService {
 
   // 3. LẤY CHI TIẾT 1 BẢNG (Kèm cột và tasks)
   async findOne(id: number, userId: number) {
-    return this.prisma.board.findFirst({
+    const board = await this.prisma.board.findFirst({
       where: {
         id: id,
         OR: [
@@ -73,17 +77,60 @@ export class BoardService {
       },
       include: {
         columns: {
+          // where: { isArchived: false }, // 👈 THÊM: Chỉ lấy task chưa lưu trữ
           orderBy: { position: 'asc' }, // Sắp xếp cột từ trái qua phải
           include: {
             tasks: {
-              orderBy: { position: 'asc' } // Sắp xếp task từ trên xuống dưới
+              orderBy: { position: 'asc' }, // Sắp xếp task từ trên xuống dưới
+              include: { // Lấy thêm info người được giao việc để hiện avatar trên thẻ task
+                assignee: { select: { id: true, name: true, avatarUrl: true } },
+                labels: true
+              }
             }
           }
         },
         members: {
-          include: { user: true } // Lấy thông tin user của thành viên
+          include: { user: { select: { id: true, name: true, email: true, avatarUrl: true } } } // Lấy thông tin user của thành viên
         }
       }
     })
+
+    if (!board) throw new NotFoundException('Board not found or access denied');
+    return board;
+  }
+
+  // Giữ nguyên update/remove cơ bản, ta sẽ nâng cấp check quyền sau
+  // async update(id: number, updateBoardDto: UpdateBoardDto) {
+  //   return this.prisma.board.update({ where: { id }, data: updateBoardDto });
+  // }
+
+  // async remove(id: number) {
+  //   return this.prisma.board.delete({ where: { id } });
+  // }
+
+  // 4. UPDATE (Chỉ chủ bảng mới được sửa thông tin bảng)
+  async update(id: number, userId: number, updateBoardDto: UpdateBoardDto) { // 👈 Nhận thêm userId
+    // Check xem có phải owner không
+    const board = await this.prisma.board.findFirst({
+        where: { id, ownerId: userId }
+    });
+    
+    if (!board) throw new ForbiddenException('Only owner can update board info');
+
+    return this.prisma.board.update({ 
+        where: { id }, 
+        data: updateBoardDto 
+    });
+  }
+
+  // 5. REMOVE (Chỉ chủ bảng mới được xóa)
+  async remove(id: number, userId: number) { // 👈 Nhận thêm userId
+    const board = await this.prisma.board.findFirst({
+        where: { id, ownerId: userId }
+    });
+
+    if (!board) throw new ForbiddenException('Only owner can delete board');
+
+    return this.prisma.board.delete({ where: { id } });
   }
 }
