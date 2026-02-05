@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'dotenv/config'
+import { ValidationPipe } from '@nestjs/common';
 // import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
@@ -14,11 +15,11 @@ async function bootstrap() {
   });
 
   // Todo : 2. Cấu hình Validation toàn cục
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true, // Tự động loại bỏ các field thừa (không khai báo trong DTO) gửi lên
-  //   }),
-  // );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Tự động loại bỏ các field thừa (không khai báo trong DTO) gửi lên
+    }),
+  );
 
   // 3. Khởi chạy Server
   const port = process.env.PORT || 3000;
