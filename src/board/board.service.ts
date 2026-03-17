@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -112,25 +112,61 @@ export class BoardService {
   async update(id: number, userId: number, updateBoardDto: UpdateBoardDto) { // 👈 Nhận thêm userId
     // Check xem có phải owner không
     const board = await this.prisma.board.findFirst({
-        where: { id, ownerId: userId }
+      where: { id, ownerId: userId }
     });
-    
+
     if (!board) throw new ForbiddenException('Only owner can update board info');
 
-    return this.prisma.board.update({ 
-        where: { id }, 
-        data: updateBoardDto 
+    return this.prisma.board.update({
+      where: { id },
+      data: updateBoardDto
     });
   }
 
   // 5. REMOVE (Chỉ chủ bảng mới được xóa)
   async remove(id: number, userId: number) { // 👈 Nhận thêm userId
     const board = await this.prisma.board.findFirst({
-        where: { id, ownerId: userId }
+      where: { id, ownerId: userId }
     });
 
     if (!board) throw new ForbiddenException('Only owner can delete board');
 
     return this.prisma.board.delete({ where: { id } });
   }
+
+  // 6. Thêm thành viên bằng email (Share board)
+  async addMemberByEmail(boardId: number, email: string) {
+    // 6.1 Tìm user theo email
+    const user = await this.prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng với email này');
+    }
+
+    // 6.2 Kiểm tra xem user này đã có trong Board chưa
+    const existingMember = await this.prisma.boardMember.findFirst({
+      where: { boardId, userId: user.id }
+    });
+
+    if (existingMember) {
+      throw new BadRequestException('Người dùng này đã là thành viên của bảng');
+    }
+
+    // 6.3 Thêm vào bảng BoardMember
+    return this.prisma.boardMember.create({
+      data: {
+        boardId,
+        userId: user.id,
+        role: 'MEMBER' // Mặc định role là MEMBER
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true } // Trả về thông tin user để Frontend hiển thị
+        }
+      }
+    });
+  }
+
 }
