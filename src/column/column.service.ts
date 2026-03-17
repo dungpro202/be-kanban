@@ -36,19 +36,24 @@ export class ColumnService {
 
   // 1. TẠO CỘT MỚI
   async create(dto: CreateColumnDto) {
-    // Bước 1: Tìm xem trong bảng này đang có bao nhiêu cột rồi
-    const count = await this.prisma.column.count({
+    // SỬA ĐIỂM 1: Tìm vị trí lớn nhất hiện tại thay vì dùng count
+    const lastColumn = await this.prisma.column.findFirst({
       where: { boardId: dto.boardId },
+      orderBy: { position: 'desc' }
     });
 
-    // Bước 2: Tạo cột mới với position = số lượng hiện tại
-    // Ví dụ: Đang có 3 cột (0, 1, 2) -> Cột mới sẽ là 3
+    const newPosition = lastColumn ? lastColumn.position + 1 : 0;
+
     return this.prisma.column.create({
       data: {
         title: dto.title,
         boardId: dto.boardId,
-        position: count, 
+        position: newPosition, 
       },
+      // SỬA ĐIỂM 2: Include mảng tasks rỗng để Frontend không bị lỗi
+      include: {
+        tasks: true 
+      }
     });
   }
 
