@@ -50,4 +50,12 @@ export class BoardController {
   ) {
     return this.boardService.remove(id, userId); // Truyền userId vào service
   }
+  
+  @Post(':id/members')
+  addMember(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body('email') email: string
+  ) {
+    return this.boardService.addMemberByEmail(id, email);
+  }
 }
