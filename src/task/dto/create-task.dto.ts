@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsDateString, ValidateIf } from 'class-validator';
 import { Priority } from 'src/generated/prisma/browser';
 // import { Priority } from '@prisma/client'; // Import Enum từ Prisma
 
@@ -20,8 +20,10 @@ export class CreateTaskDto {
   priority?: Priority; // LOW, MEDIUM, HIGH
 
   @IsOptional()
+   @ValidateIf((object, value) => value !== null)
   @IsDateString() 
-  dueDate?: string; // Gửi lên dạng chuỗi ISO-8601 (ví dụ: "2024-12-31T00:00:00Z")
+  
+  dueDate?: string | null; // Gửi lên dạng chuỗi ISO-8601 (ví dụ: "2024-12-31T00:00:00Z")
 
   @IsOptional()
   @IsInt()

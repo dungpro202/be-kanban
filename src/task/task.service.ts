@@ -22,7 +22,9 @@ export class TaskService {
         ...dto,
         position: newPosition, // Gán vị trí cuối
         // Lưu ý: dueDate nhận vào là string, Prisma cần Date object
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        dueDate: dto.dueDate !== undefined 
+                 ? (dto.dueDate === null ? null : new Date(dto.dueDate)) 
+                 : undefined,
       },
       include: {
         assignee: { select: { id: true, name: true, email: true, avatarUrl: true } }, // Trả về thông tin người được giao việc
@@ -69,7 +71,9 @@ export class TaskService {
   //     where: { id },
   //     data: {
   //       ...dto,
-  //       dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+  //       dueDate: dto.dueDate !== undefined 
+  //             ? (dto.dueDate === null ? null : new Date(dto.dueDate)) 
+  //             : undefined,
   //     },
   //   });
   // }
@@ -84,7 +88,9 @@ export class TaskService {
       where: { id },
       data: {
         ...cleanDto, // Chỉ lấy title, description, priority...
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined, // Chuyển dueDate về Date object
+        dueDate: dto.dueDate !== undefined 
+                 ? (dto.dueDate === null ? null : new Date(dto.dueDate)) 
+                 : undefined, // Chuyển dueDate về Date object
       },
       include: { assignee: { select: { id: true, name: true, avatarUrl: true } } }
     });
